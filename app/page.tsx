@@ -1,9 +1,10 @@
-import { Room } from './Room';
+'use client';
+import Live from '@/components/Live';
 
 export default function Page() {
   return (
     <>
-      <h1 className="text-white">Figma</h1>
+      <Live />
     </>
   );
 }
