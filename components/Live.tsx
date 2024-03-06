@@ -1,9 +1,14 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import LiveCursors from './cursor/LiveCursors';
 import { useMyPresence, useOthers } from '@/liveblocks.config';
+import CursorChat from './cursor/CursorChat';
+import { CursorMode } from '@/types/type';
 
 const Live = () => {
+  const [cursorState, setCursorState] = useState({
+    mode: CursorMode.Hidden,
+  });
   const others = useOthers();
   const [{ cursor }, updateMyPresence] = useMyPresence() as any;
 
@@ -16,7 +21,7 @@ const Live = () => {
   }, []);
   const handlePointerLeave = useCallback((event: React.PointerEvent) => {
     event.preventDefault();
-
+    setCursorState({ mode: CursorMode.Hidden });
     updateMyPresence({ cursor: null, message: null });
   }, []);
 
@@ -36,6 +41,16 @@ const Live = () => {
       onPointerDown={handlePointerDown}
     >
       <LiveCursors others={others} />
+
+      {/* If cursor is in chat mode, show the chat cursor */}
+      {cursor && (
+        <CursorChat
+          cursor={cursor}
+          cursorState={cursorState}
+          setCursorState={setCursorState}
+          updateMyPresence={updateMyPresence}
+        />
+      )}
     </div>
   );
 };
