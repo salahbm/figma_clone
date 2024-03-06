@@ -11,6 +11,7 @@ import CursorChat from './cursor/CursorChat';
 import { CursorMode, CursorState, Reaction, ReactionEvent } from '@/types/type';
 import ReactionSelector from './reaction/ReactionButton';
 import useInterval from '@/hooks/useInterval';
+import FlyingReaction from './reaction/FlyingReaction';
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -239,6 +240,15 @@ const Live = () => {
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
     >
+      {reactions.map((r) => (
+        <FlyingReaction
+          key={r.timestamp.toString()}
+          x={r.point.x}
+          y={r.point.y}
+          timestamp={r.timestamp}
+          value={r.value}
+        />
+      ))}
       <LiveCursors others={others} />
 
       {/* If cursor is in chat mode, show the chat cursor */}
