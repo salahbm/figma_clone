@@ -1,17 +1,15 @@
-'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import LiveCursors from './cursor/LiveCursors';
-import {
-  useBroadcastEvent,
-  useEventListener,
-  useMyPresence,
-  useOthers,
-} from '@/liveblocks.config';
-import CursorChat from './cursor/CursorChat';
-import { CursorMode, CursorState, Reaction, ReactionEvent } from '@/types/type';
-import ReactionSelector from './reaction/ReactionButton';
-import useInterval from '@/hooks/useInterval';
-import FlyingReaction from './reaction/FlyingReaction';
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+
+import { useBroadcastEvent, useEventListener, useMyPresence, useOthers } from "@/liveblocks.config";
+import useInterval from "@/hooks/useInterval";
+import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
+import { shortcuts } from "@/constants";
+
+import { Comments } from "./comments/Comments";
+import { CursorChat, FlyingReaction, LiveCursors, ReactionSelector } from "./index";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -19,7 +17,7 @@ type Props = {
   redo: () => void;
 };
 
-const Live = () => {
+const Live = ({ canvasRef, undo, redo }: Props) => {
   /**
    * useOthers returns the list of other users in the room.
    *
@@ -57,18 +55,12 @@ const Live = () => {
 
   // Remove reactions that are not visible anymore (every 1 sec)
   useInterval(() => {
-    setReactions((reactions) =>
-      reactions.filter((reaction) => reaction.timestamp > Date.now() - 2000)
-    );
+    setReactions((reactions) => reactions.filter((reaction) => reaction.timestamp > Date.now() - 4000));
   }, 1000);
 
   // Broadcast the reaction to other users (every 100ms)
   useInterval(() => {
-    if (
-      cursorState.mode === CursorMode.Reaction &&
-      cursorState.isPressed &&
-      cursor
-    ) {
+    if (cursorState.mode === CursorMode.Reaction && cursorState.isPressed && cursor) {
       // concat all the reactions created on mouse click
       setReactions((reactions) =>
         reactions.concat([
@@ -111,32 +103,32 @@ const Live = () => {
   // Listen to keyboard events to change the cursor state
   useEffect(() => {
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.key === '/') {
+      if (e.key === "/") {
         setCursorState({
           mode: CursorMode.Chat,
           previousMessage: null,
-          message: '',
+          message: "",
         });
-      } else if (e.key === 'Escape') {
-        updateMyPresence({ message: '' });
+      } else if (e.key === "Escape") {
+        updateMyPresence({ message: "" });
         setCursorState({ mode: CursorMode.Hidden });
-      } else if (e.key === 'e') {
+      } else if (e.key === "e") {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/') {
+      if (e.key === "/") {
         e.preventDefault();
       }
     };
 
-    window.addEventListener('keyup', onKeyUp);
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [updateMyPresence]);
 
@@ -187,9 +179,7 @@ const Live = () => {
 
       // if cursor is in reaction mode, set isPressed to true
       setCursorState((state: CursorState) =>
-        cursorState.mode === CursorMode.Reaction
-          ? { ...state, isPressed: true }
-          : state
+        cursorState.mode === CursorMode.Reaction ? { ...state, isPressed: true } : state
       );
     },
     [cursorState.mode, setCursorState]
@@ -198,33 +188,31 @@ const Live = () => {
   // hide the cursor when the mouse is up
   const handlePointerUp = useCallback(() => {
     setCursorState((state: CursorState) =>
-      cursorState.mode === CursorMode.Reaction
-        ? { ...state, isPressed: false }
-        : state
+      cursorState.mode === CursorMode.Reaction ? { ...state, isPressed: false } : state
     );
   }, [cursorState.mode, setCursorState]);
 
   // trigger respective actions when the user clicks on the right menu
   const handleContextMenuClick = useCallback((key: string) => {
     switch (key) {
-      case 'Chat':
+      case "Chat":
         setCursorState({
           mode: CursorMode.Chat,
           previousMessage: null,
-          message: '',
+          message: "",
         });
         break;
 
-      case 'Reactions':
+      case "Reactions":
         setCursorState({ mode: CursorMode.ReactionSelector });
         break;
 
-      case 'Undo':
-        // undo();
+      case "Undo":
+        undo();
         break;
 
-      case 'Redo':
-        // redo();
+      case "Redo":
+        redo();
         break;
 
       default:
@@ -233,41 +221,70 @@ const Live = () => {
   }, []);
 
   return (
-    <div
-      className="relative flex h-[100vh] w-full flex-1 items-center justify-center "
-      id="canvas"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      onPointerDown={handlePointerDown}
-    >
-      {reactions.map((r) => (
-        <FlyingReaction
-          key={r.timestamp.toString()}
-          x={r.point.x}
-          y={r.point.y}
-          timestamp={r.timestamp}
-          value={r.value}
-        />
-      ))}
-      <LiveCursors others={others} />
+    <ContextMenu>
+      <ContextMenuTrigger
+        className="relative flex h-full w-full flex-1 items-center justify-center"
+        id="canvas"
+        style={{
+          cursor: cursorState.mode === CursorMode.Chat ? "none" : "auto",
+        }}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+      >
+        <canvas ref={canvasRef} />
 
-      {/* If cursor is in chat mode, show the chat cursor */}
-      {cursor && (
-        <CursorChat
-          cursor={cursor}
-          cursorState={cursorState}
-          setCursorState={setCursorState}
-          updateMyPresence={updateMyPresence}
-        />
-      )}
-      {cursorState.mode === CursorMode.ReactionSelector && (
-        <ReactionSelector
-          setReaction={(reaction) => {
-            setReaction(reaction);
-          }}
-        />
-      )}
-    </div>
+        {/* Render the reactions */}
+        {reactions.map((reaction) => (
+          <FlyingReaction
+            key={reaction.timestamp.toString()}
+            x={reaction.point.x}
+            y={reaction.point.y}
+            timestamp={reaction.timestamp}
+            value={reaction.value}
+          />
+        ))}
+
+        {/* If cursor is in chat mode, show the chat cursor */}
+        {cursor && (
+          <CursorChat
+            cursor={cursor}
+            cursorState={cursorState}
+            setCursorState={setCursorState}
+            updateMyPresence={updateMyPresence}
+          />
+        )}
+
+        {/* If cursor is in reaction selector mode, show the reaction selector */}
+        {cursorState.mode === CursorMode.ReactionSelector && (
+          <ReactionSelector
+            setReaction={(reaction) => {
+              setReaction(reaction);
+            }}
+          />
+        )}
+
+        {/* Show the live cursors of other users */}
+        <LiveCursors others={others} />
+
+        {/* Show the comments */}
+        <Comments />
+      </ContextMenuTrigger>
+
+      <ContextMenuContent className="right-menu-content">
+        {shortcuts.map((item) => (
+          <ContextMenuItem
+            key={item.key}
+            className="right-menu-item"
+            onClick={() => handleContextMenuClick(item.name)}
+          >
+            <p>{item.name}</p>
+            <p className="text-xs text-primary-grey-300">{item.shortcut}</p>
+          </ContextMenuItem>
+        ))}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 
