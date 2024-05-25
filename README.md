@@ -1,5 +1,4 @@
-![Uploading image.png…]()
-
+![image](https://github.com/salahbm/figma_clone/assets/74946617/2c451c5c-d295-4975-83e9-65bceb9cbbf0)
 
 
 🔋 Features
