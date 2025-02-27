@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import * as Portal from "@radix-ui/react-portal";
+import { useEffect, useState } from 'react';
+import * as Portal from '@radix-ui/react-portal';
 
 const DEFAULT_CURSOR_POSITION = -10000;
 
@@ -15,7 +15,7 @@ const NewThreadCursor = ({ display }: { display: boolean }) => {
   useEffect(() => {
     const updatePosition = (e: MouseEvent) => {
       // get canvas element
-      const canvas = document.getElementById("canvas");
+      const canvas = document.getElementById('canvas');
 
       if (canvas) {
         /**
@@ -48,20 +48,20 @@ const NewThreadCursor = ({ display }: { display: boolean }) => {
       });
     };
 
-    document.addEventListener("mousemove", updatePosition, false);
-    document.addEventListener("mouseenter", updatePosition, false);
+    document.addEventListener('mousemove', updatePosition, false);
+    document.addEventListener('mouseenter', updatePosition, false);
 
     return () => {
-      document.removeEventListener("mousemove", updatePosition);
-      document.removeEventListener("mouseenter", updatePosition);
+      document.removeEventListener('mousemove', updatePosition);
+      document.removeEventListener('mouseenter', updatePosition);
     };
   }, []);
 
   useEffect(() => {
     if (display) {
-      document.documentElement.classList.add("hide-cursor");
+      document.documentElement.classList.add('hide-cursor');
     } else {
-      document.documentElement.classList.remove("hide-cursor");
+      document.documentElement.classList.remove('hide-cursor');
     }
   }, [display]);
 

@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '@liveblocks/react-comments/styles.css';
-
 * {
   font-family: work sans, sans-serif;
 }
@@ -24,4 +22,11 @@
   .right-menu-item {
     @apply flex justify-between px-3 py-2 hover:bg-primary-grey-200 !important;
   }
+}
+
+/* Styles all default Comments components */
+.lb-root {
+  --lb-accent: purple;
+  --lb-spacing: 1em;
+  --lb-radius: 0;
 }

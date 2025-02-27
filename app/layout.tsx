@@ -1,7 +1,7 @@
 import { Work_Sans } from 'next/font/google';
 
 import './globals.css';
-
+import '@liveblocks/react-ui/styles.css';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import Room from './Room';
 

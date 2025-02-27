@@ -469,7 +469,7 @@ const Home = () => {
       window.removeEventListener('keydown', (e) =>
         handleKeyDown({
           e,
-          canvas: fabricRef.current,
+          canvas: fabricRef?.current,
           undo,
           redo,
           syncShapeInStorage,
@@ -477,7 +477,16 @@ const Home = () => {
         })
       );
     };
-  }, [canvasRef]); // run this effect only once when the component mounts and the canvasRef changes
+  }, [
+    canvasRef,
+    fabricRef,
+    canvasObjects,
+    deleteAllShapes,
+    redo,
+    undo,
+    deleteShapeFromStorage,
+    syncShapeInStorage,
+  ]); // run this effect only once when the component mounts and the canvasRef changes
 
   // render the canvas when the canvasObjects from live storage changes
   useEffect(() => {
