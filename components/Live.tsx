@@ -1,15 +1,30 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-import { useBroadcastEvent, useEventListener, useMyPresence, useOthers } from "@/liveblocks.config";
-import useInterval from "@/hooks/useInterval";
-import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
-import { shortcuts } from "@/constants";
+import {
+  useBroadcastEvent,
+  useEventListener,
+  useMyPresence,
+  useOthers,
+} from '@/liveblocks.config';
+import useInterval from '@/hooks/useInterval';
+import { CursorMode, CursorState, Reaction, ReactionEvent } from '@/types/type';
+import { shortcuts } from '@/constants';
 
-import { Comments } from "./comments/Comments";
-import { CursorChat, FlyingReaction, LiveCursors, ReactionSelector } from "./index";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
+import { Comments } from './comments/Comments';
+import {
+  CursorChat,
+  FlyingReaction,
+  LiveCursors,
+  ReactionSelector,
+} from './index';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from './ui/context-menu';
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -55,12 +70,18 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
 
   // Remove reactions that are not visible anymore (every 1 sec)
   useInterval(() => {
-    setReactions((reactions) => reactions.filter((reaction) => reaction.timestamp > Date.now() - 4000));
+    setReactions((reactions) =>
+      reactions.filter((reaction) => reaction.timestamp > Date.now() - 4000)
+    );
   }, 1000);
 
   // Broadcast the reaction to other users (every 100ms)
   useInterval(() => {
-    if (cursorState.mode === CursorMode.Reaction && cursorState.isPressed && cursor) {
+    if (
+      cursorState.mode === CursorMode.Reaction &&
+      cursorState.isPressed &&
+      cursor
+    ) {
       // concat all the reactions created on mouse click
       setReactions((reactions) =>
         reactions.concat([
@@ -103,32 +124,32 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
   // Listen to keyboard events to change the cursor state
   useEffect(() => {
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "/") {
+      if (e.key === '/') {
         setCursorState({
           mode: CursorMode.Chat,
           previousMessage: null,
-          message: "",
+          message: '',
         });
-      } else if (e.key === "Escape") {
-        updateMyPresence({ message: "" });
+      } else if (e.key === 'Escape') {
+        updateMyPresence({ message: '' });
         setCursorState({ mode: CursorMode.Hidden });
-      } else if (e.key === "e") {
+      } else if (e.key === 'e') {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/") {
+      if (e.key === '/') {
         e.preventDefault();
       }
     };
 
-    window.addEventListener("keyup", onKeyUp);
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('keydown', onKeyDown);
 
     return () => {
-      window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [updateMyPresence]);
 
@@ -179,7 +200,9 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
 
       // if cursor is in reaction mode, set isPressed to true
       setCursorState((state: CursorState) =>
-        cursorState.mode === CursorMode.Reaction ? { ...state, isPressed: true } : state
+        cursorState.mode === CursorMode.Reaction
+          ? { ...state, isPressed: true }
+          : state
       );
     },
     [cursorState.mode, setCursorState]
@@ -188,30 +211,32 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
   // hide the cursor when the mouse is up
   const handlePointerUp = useCallback(() => {
     setCursorState((state: CursorState) =>
-      cursorState.mode === CursorMode.Reaction ? { ...state, isPressed: false } : state
+      cursorState.mode === CursorMode.Reaction
+        ? { ...state, isPressed: false }
+        : state
     );
   }, [cursorState.mode, setCursorState]);
 
   // trigger respective actions when the user clicks on the right menu
   const handleContextMenuClick = useCallback((key: string) => {
     switch (key) {
-      case "Chat":
+      case 'Chat':
         setCursorState({
           mode: CursorMode.Chat,
           previousMessage: null,
-          message: "",
+          message: '',
         });
         break;
 
-      case "Reactions":
+      case 'Reactions':
         setCursorState({ mode: CursorMode.ReactionSelector });
         break;
 
-      case "Undo":
+      case 'Undo':
         undo();
         break;
 
-      case "Redo":
+      case 'Redo':
         redo();
         break;
 
@@ -226,7 +251,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
         className="relative flex h-full w-full flex-1 items-center justify-center"
         id="canvas"
         style={{
-          cursor: cursorState.mode === CursorMode.Chat ? "none" : "auto",
+          cursor: cursorState.mode === CursorMode.Chat ? 'none' : 'auto',
         }}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
